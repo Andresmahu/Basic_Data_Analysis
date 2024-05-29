@@ -1,40 +1,30 @@
-import pandas as pd
-import numpy as np
-from sklearn.model_selection import train_test_split
-import statsmodels.api as sm
-import matplotlib.pyplot as plt
-data = pd.read_csv(r'C:\Users\Asus\PycharmProjects\Basic_Data_Analysis\Basic_Data_Analysis-main\sales_data_sample.csv')
-ModelData=data[['SALES','QUANTITYORDERED']].to_numpy()
-registros_unicos = data[~data.duplicated(['PRODUCTCODE'])]
-Codigos=registros_unicos['PRODUCTCODE'].to_numpy()
-DataMatrix=[]
-ModelMatrix=[]
-Tags=[]
-DataTrainMatrix = []
-DataTestMatrix = []
-for codigo in Codigos:
-    df = pd.read_csv(fr'C:\Users\Asus\PycharmProjects\Basic_Data_Analysis\Basic_Data_Analysis-main\DataBase\Product_{codigo}.csv')
-    df['ORDERDATE'] = pd.to_datetime(df['ORDERDATE'])
-    df.set_index('ORDERDATE', inplace=True)
-    df = df.sort_index()
-    Product_data = df[['QUANTITYORDERED']]
-    DataMatrix.append(Product_data)
-    df_unique = df[~df.duplicated(['PRODUCTCODE'])]
-    Tags.append(df_unique[['PRODUCTLINE', 'PRODUCTCODE']].to_numpy())
-    train_size = int(len(Product_data) * 0.8)
-    train_data = Product_data.iloc[:train_size]
-    test_data = Product_data.iloc[train_size:]
-    DataTrainMatrix.append(train_data)
-    DataTestMatrix.append(test_data)
-forecasts = []
-for train_data, test_data in zip(DataTrainMatrix, DataTestMatrix):
-    model = sm.tsa.ARIMA(train_data, order=(5, 1, 2))
-    model_fit = model.fit()
-    ModelMatrix.append(model_fit)
-    start = len(train_data)
-    end = len(train_data) + len(test_data) - 1
-    predictions = model_fit.predict(start=start, end=end, typ='levels')
-    forecasts.append(predictions)
-for codigo, forecast in zip(Codigos, forecasts):
-    print(f'Pronóstico para el producto {codigo}:')
-    print(forecast)
+# Importar la clase Tk de la biblioteca tkinter
+from tkinter import Tk
+# Importar el módulo GeneratorView que contiene la interfaz gráfica
+import GeneratorView
+# Importar el módulo CsvWriter para escribir datos en formato CSV
+import CsvWriter
+
+# Definir la función principal del programa
+def main():
+    # Crear una instancia de la clase Tk para la ventana principal
+    ventana = Tk()
+    # Configurar el título de la ventana principal
+    ventana.wm_title("Registro de Datos en MySQL")
+    # Configurar el color de fondo de la ventana principal
+    ventana.config(bg='gray22')
+    # Configurar las dimensiones de la ventana principal (ancho x alto)
+    ventana.geometry('900x530')
+    # Bloquear el cambio de tamaño de la ventana principal
+    ventana.resizable(0, 0)
+    # Crear una instancia de la clase Registro del módulo GeneratorView, pasando la ventana principal como argumento
+    app = GeneratorView.Registro(ventana)
+    # Iniciar el bucle principal de la aplicación
+    app.mainloop()
+    # Llamar a la función CsvWriter para escribir los datos en formato CSV, pasando el DataFrame de la aplicación como argumento
+    CsvWriter.CsvWriter(app.df)
+
+# Verificar si este archivo es el punto de entrada principal del programa
+if __name__ == "__main__":
+    # Llamar a la función main() para iniciar la aplicación
+    main()
