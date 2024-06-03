@@ -20,7 +20,7 @@ class CsvUpdater:
         data_filtrado = self.data[self.data['Codigo'] == codigo]
 
         for _, row in data_filtrado.iterrows():
-            self.update_row(csv_actual, row)
+            csv_actual = self.update_row(csv_actual, row)
 
         csv_actual.to_csv(csv_original_path, index=False)
 
@@ -42,7 +42,8 @@ class CsvUpdater:
             'STOCK': stock_new
         }
 
-        nuevos_registros = pd.DataFrame(columns=csv_actual.columns)
-        nuevos_registros = pd.concat([nuevos_registros, pd.DataFrame([new_record])], ignore_index=True)
+        nuevos_registros = pd.DataFrame([new_record], columns=csv_actual.columns)
         csv_actual = pd.concat([csv_actual, nuevos_registros], ignore_index=True)
         return csv_actual
+
+
